@@ -149,7 +149,7 @@ CONTAINER ID   IMAGE                  COMMAND                  CREATED         S
 ccba643ce4ff   kindest/node:v1.27.1   "/usr/local/bin/entr…"   2 minutes ago   Up 2 minutes   127.0.0.1:50154->6443/tcp   kind-control-plane
 ```
 
-Connect to container and list images
+Connect to container and list images available to the kind cluster (loaded by `kind load docker-image` command above)
 ```
 docker exec -it kind-control-plane bash
 root@kind-control-plane:/# crictl images
@@ -167,14 +167,6 @@ kubectl describe pod <name>
 ```
 helm ls --namespace hello-world-app
 ```
-
-### Kubernetes types
-
-* Pods: Instances of the application
-* Services: Provides networking, e.g. this is where you can see the IP address of a service
-* Deployments: Manages replica sets for the application
-* ReplicaSets: Ensures a specified number of replicas are running
-* StatefulSets: Manages stateful applications by providing stable network identities, ordered deployment, and persistent storage for Pods with unique identities.
 
 
 ### Useful `kubectl` commands
@@ -205,7 +197,7 @@ kubectl get pods --all-namespaces
 
 ```
 kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply --namespace argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
 
 See what's running
@@ -213,8 +205,16 @@ See what's running
 kubectl get all --namespace argocd
 ```
 
+### Kubernetes types
 
-### Forward ports to access ArgoCD
+* Pods: Instances of the application
+* Services: Provides networking, e.g. this is where you can see the IP address of a service
+* Deployments: Manages replica sets for the application
+* ReplicaSets: Ensures a specified number of replicas are running
+* StatefulSets: Manages stateful applications by providing stable network identities, ordered deployment, and persistent storage for Pods with unique identities.
+
+
+### Use port forwarding to open ArgoCD
 ```
 kubectl get services -n argocd
 kubectl port-forward service/argocd-server -n argocd 8080:443
@@ -228,13 +228,26 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 ```
 
 
-### Create ArgoCD app
+## Create ArgoCD app
 
 1. Click `+ New app` button
 1. Enter
-  - Application name: hello-argocd-and-helm
+  - Application name: hello-world-app
   - Project name: default
   - Sync policy: Manual
   - Auto-create namespace: On
   - Repository url: https://github.com/rasmusselsmark/hello-argocd-and-helm
-  - 
+  - Path: charts
+  - Cluster URL: https://kubernetes.default.svc
+  - Namespace: hello-world-app-argocd
+  - Values: values.yaml
+1. You should now be able to see the app. Click Sync to synchronize it
+
+### Use port forwarding to access our app running in `hello-world-app-argocd` namespace
+
+```
+kubectl get services -n hello-world-app-argocd
+kubectl port-forward service/hello-world-app-charts -n hello-world-app-argocd 8081:80
+```
+
+You can now access the app at http://localhost:8081/
