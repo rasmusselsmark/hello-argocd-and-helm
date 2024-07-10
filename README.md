@@ -228,7 +228,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 ```
 
 
-## Create ArgoCD app
+## Create ArgoCD app (manually using UI)
 
 1. Click `+ New app` button
 1. Enter
@@ -251,3 +251,25 @@ kubectl port-forward service/hello-world-app-charts -n hello-world-app-argocd 80
 ```
 
 You can now access the app at http://localhost:8081/
+
+
+## Create ArgoCD app using `kubectl`
+
+Instead of creating manually, we can apply the manifest using
+```
+kubectl apply -n argocd -f apps/hello-world-app.yaml
+```
+
+Note this manifest has auto-sync enabled, so no need to manually refresh in ArgoCD UI.
+
+
+## Using ArgoCD App of Apps Pattern
+
+The [ArgoCD App of Apps pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) allows us to configure ArgoCD as code, which is particularly useful when having more than one application.
+
+Video: [The App of Apps Pattern for Argo CD in Less than 8 Minutes](https://www.youtube.com/watch?v=2pvGL0zqf9o)
+
+By running following command, we're configuring ArgoCD to automatically look in the `apps/` folder for applications:
+```
+kubectl apply -n argocd -f app-of-apps/app-of-apps.yaml
+```

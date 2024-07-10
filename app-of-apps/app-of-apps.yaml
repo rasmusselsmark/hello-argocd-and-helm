@@ -1,21 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: hello-world-app
+  name: app-of-apps
 spec:
   destination:
-    name: ''
-    namespace: hello-world-app-argocd
-    server: 'https://kubernetes.default.svc'
+    name: in-cluster
+    namespace: argocd
+    server: ''
   source:
-    path: charts
+    path: apps
     repoURL: 'https://github.com/rasmusselsmark/hello-argocd-and-helm'
     targetRevision: HEAD
   sources: []
   project: default
   syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
     automated:
       prune: false
       selfHeal: false
